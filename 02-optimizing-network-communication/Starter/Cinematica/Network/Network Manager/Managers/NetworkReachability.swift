@@ -33,7 +33,7 @@
 import Foundation
 import Network
 
-public enum NetworkReachability {
+public final class NetworkReachability {
   public static let queue = DispatchQueue(label: "NetworkConnectivityMonitor")
   public static let monitor = NWPathMonitor()
 
@@ -43,7 +43,7 @@ public enum NetworkReachability {
 
   public static func startMonitoring() {
     NetworkReachability.monitor.pathUpdateHandler = { path in
-      NetworkReachability.isConnected = path.status != .unsatisfied
+      NetworkReachability.isConnected = path.status == .satisfied
       NetworkReachability.isExpensive = path.isExpensive
       NetworkReachability.currentConnectionType =
       NWInterface.InterfaceType.allCases.first { path.usesInterfaceType($0) }

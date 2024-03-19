@@ -108,16 +108,17 @@ class MovieListViewModel: ObservableObject {
     let newMovies = moviePaginatedResponse.results ?? []
 
     await MainActor.run { [weak self] in
-      if var existingMovies = self?.allMovies[type] {
+      guard let self else { return }
+      if var existingMovies = allMovies[type] {
         existingMovies.append(contentsOf: newMovies)
-        self?.allMovies[type] = existingMovies
+        allMovies[type] = existingMovies
       } else {
-        self?.allMovies[type] = newMovies
+        allMovies[type] = newMovies
       }
 
-      self?.totalPages[type] = moviePaginatedResponse.totalPages ?? 1
-      self?.currentPage[type] = currentPageForType + 1
-      self?.isFetching[type] = false
+      totalPages[type] = moviePaginatedResponse.totalPages ?? 1
+      currentPage[type] = currentPageForType + 1
+      isFetching[type] = false
     }
   }
 }
