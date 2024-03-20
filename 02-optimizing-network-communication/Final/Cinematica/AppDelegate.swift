@@ -40,4 +40,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     NetworkReachability.startMonitoring()
     return true
   }
+  
+  func applicationWillTerminate(_ application: UIApplication) {
+    NetworkReachability.stopMonitoring()
+  }
 }
