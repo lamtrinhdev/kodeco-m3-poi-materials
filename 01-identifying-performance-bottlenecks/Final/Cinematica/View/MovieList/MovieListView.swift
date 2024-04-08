@@ -48,11 +48,6 @@ struct MovieListView: View {
             ForEach(movieListViewModel.movies) { movie in
               MovieCellView(movie: movie)
                 .frame(height: 100)
-                .onAppear {
-                  if movie == movieListViewModel.movies.last {
-                    movieListViewModel.fetchMovies()
-                  }
-                }
             }
             .padding(.horizontal)
           }
@@ -63,43 +58,16 @@ struct MovieListView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.systemBackground).opacity(0.8))
         }
-        if movieListViewModel.errorMessage != nil && movieListViewModel.movies.isEmpty {
-          VStack {
-            Spacer()
-            Button {
-              movieListViewModel.fetchMovies()
-            } label: {
-              Text("Retry")
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-            }
-            Spacer()
-          }
-          .padding()
-        }
       }
-      .onAppear {
+      .task {
         if movieListViewModel.movies.isEmpty {
-          movieListViewModel.fetchMovies()
+          await movieListViewModel.fetchMovies()
         }
-      }
-      .alert(isPresented: $showingErrorAlert) {
-        Alert(
-          title: Text("Error"),
-          message: Text(movieListViewModel.errorMessage ?? "Unknown error occurred."),
-          dismissButton: .default(Text("OK"))
-        )
-      }
-    }
-    .onReceive(movieListViewModel.$errorMessage) { errorMessage in
-      if errorMessage != nil {
-        showingErrorAlert = true
       }
     }
   }
 }
+
 
 #Preview {
   MovieListView(movieListViewModel: MovieListViewModel())

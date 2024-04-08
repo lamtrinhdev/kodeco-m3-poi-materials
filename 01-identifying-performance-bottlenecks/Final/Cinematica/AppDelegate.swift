@@ -37,11 +37,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-    NetworkReachability.startMonitoring()
     return true
-  }
-  
-  func applicationWillTerminate(_ application: UIApplication) {
-    NetworkReachability.stopMonitoring()
   }
 }

@@ -34,11 +34,13 @@ import SwiftUI
 
 struct MovieCellView: View {
   // MARK: - Properties
-  @State var movie: Movie
+  @ObservedObject var movieListViewModel: MovieListViewModel
+  let index: Int
 
   // MARK: - body
   var body: some View {
     HStack(alignment: .top) {
+      let movie = movieListViewModel.movies[index]
       AsyncImage(url: movie.imageUrl) { image in
         image
           .resizable()
@@ -46,44 +48,34 @@ struct MovieCellView: View {
           .frame(height: 100)
       } placeholder: {
         ZStack {
-          Image(.imagePlaceholder)
-            .resizable()
-            .aspectRatio(0.67, contentMode: .fit)
-            .frame(height: 100)
+          GeometryReader { geometry in
+            Image(.imagePlaceholder)
+              .resizable()
+              .aspectRatio(contentMode: .fit)
+              .frame(width: geometry.size.width, height: geometry.size.width * 0.67)
+          }
           ProgressView()
         }
       }
       .padding(.trailing, 5)
       VStack(alignment: .leading) {
-        Text(movie.originalTitle ?? "")
+        Label(
+          title: { Text(movie.originalTitle ?? "") },
+          icon: { EmptyView() }
+        )
           .font(.title)
-        Text(movie.overview ?? "")
-          .font(.subheadline)
+        Label(
+          title: { Text(movie.overview ?? "") },
+          icon: { EmptyView() }
+        )
       }
       Spacer()
     }
     .frame(height: 100)
+    .shadow(color: .black.opacity(0.5), radius: 10, x: 5, y: 5)
   }
 }
 
 #Preview {
-  MovieCellView(
-    movie:
-      Movie(
-        adult: false,
-        backdropPath: "",
-        genreIds: nil,
-        id: 1,
-        originalLanguage: nil,
-        originalTitle: "Original Title",
-        overview: "Overview",
-        popularity: nil,
-        posterPath: "",
-        releaseDate: nil,
-        title: "Movie Title",
-        video: false,
-        voteAverage: 5,
-        voteCount: 1
-      )
-  )
+  MovieCellView(movieListViewModel: MovieListViewModel(), index: 0)
 }

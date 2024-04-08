@@ -34,14 +34,15 @@ import SwiftUI
 
 struct MovieListView: View {
   @ObservedObject var movieListViewModel: MovieListViewModel
-  @State private var showingErrorAlert = false
 
   var body: some View {
     NavigationStack {
-      List(movieListViewModel.movies) { movie in
-        MovieCellView(movie: movie)
-          .frame(height: 100)
-          .padding(.horizontal)
+      List {
+        ForEach(movieListViewModel.movies.indices, id: \.self) { index in
+          MovieCellView(movieListViewModel: movieListViewModel, index: index)
+            .frame(height: 100)
+            .padding(.horizontal)
+        }
       }
       .navigationTitle("Upcoming Movies")
       .overlay {

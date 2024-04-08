@@ -13,10 +13,8 @@
 		62A71B402BA45B930071E414 /* DataParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A71B3F2BA45B930071E414 /* DataParser.swift */; };
 		62A71B442BA45C1C0071E414 /* RequestProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A71B432BA45C1C0071E414 /* RequestProtocol.swift */; };
 		62A71B462BA45C6C0071E414 /* RequestType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A71B452BA45C6C0071E414 /* RequestType.swift */; };
-		62A71B482BA45C8E0071E414 /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A71B472BA45C8E0071E414 /* NetworkError.swift */; };
 		62A71B4A2BA45CB70071E414 /* RequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A71B492BA45CB70071E414 /* RequestManager.swift */; };
 		62A71B4C2BA45D2E0071E414 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A71B4B2BA45D2E0071E414 /* APIManager.swift */; };
-		62A71B522BA45DD90071E414 /* NetworkReachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A71B512BA45DD90071E414 /* NetworkReachability.swift */; };
 		62A71B542BA4608D0071E414 /* APIConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A71B532BA4608D0071E414 /* APIConstants.swift */; };
 		62A71B5B2BA470EF0071E414 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62A71B5A2BA470EF0071E414 /* LaunchScreen.storyboard */; };
 		62F9F4CB2BA4739600E0C3F3 /* APIsPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F9F4CA2BA4739600E0C3F3 /* APIsPaths.swift */; };
@@ -39,10 +37,8 @@
 		62A71B3F2BA45B930071E414 /* DataParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataParser.swift; sourceTree = "<group>"; };
 		62A71B432BA45C1C0071E414 /* RequestProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestProtocol.swift; sourceTree = "<group>"; };
 		62A71B452BA45C6C0071E414 /* RequestType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestType.swift; sourceTree = "<group>"; };
-		62A71B472BA45C8E0071E414 /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
 		62A71B492BA45CB70071E414 /* RequestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestManager.swift; sourceTree = "<group>"; };
 		62A71B4B2BA45D2E0071E414 /* APIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIManager.swift; sourceTree = "<group>"; };
-		62A71B512BA45DD90071E414 /* NetworkReachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkReachability.swift; sourceTree = "<group>"; };
 		62A71B532BA4608D0071E414 /* APIConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIConstants.swift; sourceTree = "<group>"; };
 		62A71B5A2BA470EF0071E414 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		62F9F4CA2BA4739600E0C3F3 /* APIsPaths.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIsPaths.swift; sourceTree = "<group>"; };
@@ -134,7 +130,6 @@
 			children = (
 				62A71B492BA45CB70071E414 /* RequestManager.swift */,
 				62A71B4B2BA45D2E0071E414 /* APIManager.swift */,
-				62A71B512BA45DD90071E414 /* NetworkReachability.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -152,7 +147,6 @@
 			isa = PBXGroup;
 			children = (
 				62A71B3F2BA45B930071E414 /* DataParser.swift */,
-				62A71B472BA45C8E0071E414 /* NetworkError.swift */,
 			);
 			path = Response;
 			sourceTree = "<group>";
@@ -309,9 +303,7 @@
 				62F9F4CD2BA4742A00E0C3F3 /* MoviesRequests.swift in Sources */,
 				62A71B442BA45C1C0071E414 /* RequestProtocol.swift in Sources */,
 				62F9F54E2BA49D7900E0C3F3 /* MovieCellView.swift in Sources */,
-				62A71B522BA45DD90071E414 /* NetworkReachability.swift in Sources */,
 				62A71B462BA45C6C0071E414 /* RequestType.swift in Sources */,
-				62A71B482BA45C8E0071E414 /* NetworkError.swift in Sources */,
 				62F9F4CB2BA4739600E0C3F3 /* APIsPaths.swift in Sources */,
 				62F9F5522BA4D01F00E0C3F3 /* AppConstants.swift in Sources */,
 			);

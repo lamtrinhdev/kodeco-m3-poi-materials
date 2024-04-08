@@ -63,6 +63,12 @@ struct MovieCellView: View {
       Spacer()
     }
     .frame(height: 100)
+    .background(
+      Rectangle()
+        .fill(Color.white)
+        .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 2)
+        .padding(1)
+    )
   }
 }
 
