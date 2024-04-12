@@ -33,7 +33,7 @@
 import SwiftUI
 
 struct MovieListView: View {
-  @ObservedObject var movieListViewModel: MovieListViewModel
+  @State var movieListViewModel: MovieListViewModel
   @State private var showingErrorAlert = false
 
   var columns: [GridItem] = [

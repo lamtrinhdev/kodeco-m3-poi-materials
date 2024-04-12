@@ -31,11 +31,13 @@
 /// THE SOFTWARE.
 
 import Foundation
+import Observation
 
-class MovieListViewModel: ObservableObject {
+@Observable
+class MovieListViewModel {
   // MARK: - Properties
-  @Published var movies: [Movie] = []
-  @Published var isLoading = true
+  var movies: [Movie] = []
+  var isLoading = true
   private let requestManager = RequestManager()
 
   // MARK: - Methods
