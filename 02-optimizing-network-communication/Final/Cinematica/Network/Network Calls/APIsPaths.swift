@@ -34,5 +34,5 @@ import Foundation
 
 enum APIsPaths {
   static let moviePath = "/3/movie"
-  static let nowPlayingPath = moviePath + "/now_playing"
+  static let upcomingPath = moviePath + "/upcoming"
 }

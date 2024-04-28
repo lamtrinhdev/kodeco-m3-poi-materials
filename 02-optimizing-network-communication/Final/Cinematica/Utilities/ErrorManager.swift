@@ -32,8 +32,9 @@
 
 import Foundation
 
-class ErrorManager: ObservableObject {
-  @Published var errorMessage: String?
+@Observable
+class ErrorManager {
+  var errorMessage: String?
 
   func handleError(_ error: Error?) {
     errorMessage = error?.localizedDescription

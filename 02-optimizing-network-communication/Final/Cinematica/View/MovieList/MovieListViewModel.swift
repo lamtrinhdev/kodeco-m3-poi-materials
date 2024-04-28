@@ -38,7 +38,7 @@ class MovieListViewModel {
   // MARK: - Properties
   var movies: [Movie] = []
   var isLoading = true
-  var errorMessage: String?
+  var errorManager = ErrorManager()
   private let requestManager = RequestManager()
   private var currentPage = 1
   private var totalPages = 1
@@ -51,7 +51,7 @@ class MovieListViewModel {
 
     do {
       let moviePaginatedResponse: MoviePaginatedResponse = try await
-      requestManager.perform(MoviesRequests.fetchNowPlaying(page: currentPage))
+      requestManager.perform(MoviesRequests.fetchUpcoming(page: currentPage))
       let newMovies = moviePaginatedResponse.results ?? []
       await MainActor.run {
         self.movies.append(contentsOf: newMovies)
@@ -59,12 +59,11 @@ class MovieListViewModel {
         self.isLoading = false
         self.currentPage += 1
         self.isFetching = false
-        self.errorMessage = nil
       }
     } catch {
       await MainActor.run {
         self.isLoading = false
-        self.errorMessage = error.localizedDescription
+        errorManager.handleError(error)
         self.isFetching = false
       }
     }

@@ -49,7 +49,7 @@ struct MovieListView: View {
               MovieCellView(movie: movie)
                 .frame(height: 100)
                 .onAppear {
-                  if movie == movieListViewModel.movies.last {
+                  if movie.id == movieListViewModel.movies.last?.id {
                     fetchMovies()
                   }
                 }
@@ -63,7 +63,7 @@ struct MovieListView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.systemBackground).opacity(0.8))
         }
-        if movieListViewModel.errorMessage != nil && movieListViewModel.movies.isEmpty {
+        if movieListViewModel.errorManager.errorMessage != nil && movieListViewModel.movies.isEmpty {
           VStack {
             Spacer()
             Button {
@@ -85,11 +85,13 @@ struct MovieListView: View {
           await movieListViewModel.fetchMovies()
         }
       }
-      .alert(isPresented: $showingErrorAlert) {
+      .alert(item: $movieListViewModel.errorManager.errorMessage) { errorMessage in
         Alert(
           title: Text("Error"),
-          message: Text(movieListViewModel.errorMessage ?? "Unknown error occurred."),
-          dismissButton: .default(Text("OK"))
+          message: Text(errorMessage),
+          dismissButton: .default(Text("OK")) {
+            movieListViewModel.errorManager.clearError()
+          }
         )
       }
     }
