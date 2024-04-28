@@ -31,29 +31,41 @@
 /// THE SOFTWARE.
 
 import Foundation
-import Observation
+import Network
 
-@Observable
-class MovieListViewModel {
-  // MARK: - Properties
-  var movies: [Movie] = []
-  var isLoading = true
-  private let requestManager = RequestManager()
+public enum NetworkReachability {
+  public static let queue = DispatchQueue(label: "NetworkConnectivityMonitor")
+  public static let monitor = NWPathMonitor()
 
-  // MARK: - Methods
-  func fetchMovies() async {
-    do {
-      let moviePaginatedResponse: MoviePaginatedResponse = try await
-      requestManager.perform(MoviesRequests.fetchNowPlaying(page: 1))
-      let newMovies = moviePaginatedResponse.results ?? []
-      await MainActor.run {
-        self.movies.append(contentsOf: newMovies)
-        self.isLoading = false
-      }
-    } catch {
-      await MainActor.run {
-        self.isLoading = false
-      }
+  public static private(set) var isConnected = false
+  public static private(set) var isExpensive = false
+  public static private(set) var currentConnectionType: NWInterface.InterfaceType?
+
+  public static func startMonitoring() {
+    NetworkReachability.monitor.pathUpdateHandler = { path in
+      NetworkReachability.isConnected = path.status == .satisfied
+      NetworkReachability.isExpensive = path.isExpensive
+      NetworkReachability.currentConnectionType =
+      NWInterface.InterfaceType.allCases.first { path.usesInterfaceType($0) }
     }
+    NetworkReachability.monitor.start(queue: NetworkReachability.queue)
   }
+
+  public static func stopMonitoring() {
+    NetworkReachability.monitor.cancel()
+  }
+}
+
+public extension Notification.Name {
+  static let connectivityStatus = Notification.Name(rawValue: "connectivityStatusChanged")
+}
+
+extension NWInterface.InterfaceType: CaseIterable {
+  public static var allCases: [NWInterface.InterfaceType] = [
+    .other,
+    .wifi,
+    .cellular,
+    .loopback,
+    .wiredEthernet
+  ]
 }

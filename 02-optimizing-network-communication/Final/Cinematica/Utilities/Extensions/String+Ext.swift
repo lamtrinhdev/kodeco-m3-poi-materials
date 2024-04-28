@@ -31,29 +31,10 @@
 /// THE SOFTWARE.
 
 import Foundation
-import Observation
 
-@Observable
-class MovieListViewModel {
-  // MARK: - Properties
-  var movies: [Movie] = []
-  var isLoading = true
-  private let requestManager = RequestManager()
-
-  // MARK: - Methods
-  func fetchMovies() async {
-    do {
-      let moviePaginatedResponse: MoviePaginatedResponse = try await
-      requestManager.perform(MoviesRequests.fetchNowPlaying(page: 1))
-      let newMovies = moviePaginatedResponse.results ?? []
-      await MainActor.run {
-        self.movies.append(contentsOf: newMovies)
-        self.isLoading = false
-      }
-    } catch {
-      await MainActor.run {
-        self.isLoading = false
-      }
-    }
+extension String: Identifiable {
+  public typealias ID = Int
+  public var id: Int {
+    return hash
   }
 }

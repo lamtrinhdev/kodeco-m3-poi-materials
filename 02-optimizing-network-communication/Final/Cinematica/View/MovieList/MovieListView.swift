@@ -33,7 +33,7 @@
 import SwiftUI
 
 struct MovieListView: View {
-  @ObservedObject var movieListViewModel: MovieListViewModel
+  @State var movieListViewModel: MovieListViewModel
   @State private var showingErrorAlert = false
 
   var columns: [GridItem] = [
@@ -50,7 +50,7 @@ struct MovieListView: View {
                 .frame(height: 100)
                 .onAppear {
                   if movie == movieListViewModel.movies.last {
-                    movieListViewModel.fetchMovies()
+                    fetchMovies()
                   }
                 }
             }
@@ -67,7 +67,7 @@ struct MovieListView: View {
           VStack {
             Spacer()
             Button {
-              movieListViewModel.fetchMovies()
+              fetchMovies()
             } label: {
               Text("Retry")
                 .padding()
@@ -80,9 +80,9 @@ struct MovieListView: View {
           .padding()
         }
       }
-      .onAppear {
+      .task {
         if movieListViewModel.movies.isEmpty {
-          movieListViewModel.fetchMovies()
+          await movieListViewModel.fetchMovies()
         }
       }
       .alert(isPresented: $showingErrorAlert) {
@@ -93,10 +93,16 @@ struct MovieListView: View {
         )
       }
     }
-    .onReceive(movieListViewModel.$errorMessage) { errorMessage in
-      if errorMessage != nil {
-        showingErrorAlert = true
-      }
+//    .onReceive(movieListViewModel.$errorMessage) { errorMessage in
+//      if errorMessage != nil {
+//        showingErrorAlert = true
+//      }
+//    }
+  }
+
+  private func fetchMovies() {
+    Task {
+      await movieListViewModel.fetchMovies()
     }
   }
 }

@@ -1,15 +1,15 @@
 /// Copyright (c) 2024 Kodeco Inc.
-///
+/// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
 /// in the Software without restriction, including without limitation the rights
 /// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 /// copies of the Software, and to permit persons to whom the Software is
 /// furnished to do so, subject to the following conditions:
-///
+/// 
 /// The above copyright notice and this permission notice shall be included in
 /// all copies or substantial portions of the Software.
-///
+/// 
 /// Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
 /// distribute, sublicense, create a derivative work, and/or sell copies of the
 /// Software in any work that is designed, intended, or marketed for pedagogical or
@@ -17,7 +17,7 @@
 /// or information technology.  Permission for such use, copying, modification,
 /// merger, publication, distribution, sublicensing, creation of derivative works,
 /// or sale is expressly withheld.
-///
+/// 
 /// This project and source code may use libraries or frameworks that are
 /// released under various Open-Source licenses. Use of those libraries and
 /// frameworks are governed by their own individual licenses.
@@ -30,42 +30,20 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import Foundation
-import Network
+import UIKit
 
-public final class NetworkReachability {
-  public static let queue = DispatchQueue(label: "NetworkConnectivityMonitor")
-  public static let monitor = NWPathMonitor()
+class ImageCache {
+  static let shared = ImageCache()
 
-  public static private(set) var isConnected = false
-  public static private(set) var isExpensive = false
-  public static private(set) var currentConnectionType: NWInterface.InterfaceType?
+  private let cache = NSCache<NSString, UIImage>()
 
-  public static func startMonitoring() {
-    NetworkReachability.monitor.pathUpdateHandler = { path in
-      NetworkReachability.isConnected = path.status == .satisfied
-      NetworkReachability.isExpensive = path.isExpensive
-      NetworkReachability.currentConnectionType =
-      NWInterface.InterfaceType.allCases.first { path.usesInterfaceType($0) }
-    }
-    NetworkReachability.monitor.start(queue: NetworkReachability.queue)
+  private init() {}
+
+  func set(_ image: UIImage, forKey key: String) {
+    cache.setObject(image, forKey: key as NSString)
   }
 
-  public static func stopMonitoring() {
-    NetworkReachability.monitor.cancel()
+  func get(forKey key: String) -> UIImage? {
+    return cache.object(forKey: key as NSString)
   }
-}
-
-public extension Notification.Name {
-  static let connectivityStatus = Notification.Name(rawValue: "connectivityStatusChanged")
-}
-
-extension NWInterface.InterfaceType: CaseIterable {
-  public static var allCases: [NWInterface.InterfaceType] = [
-    .other,
-    .wifi,
-    .cellular,
-    .loopback,
-    .wiredEthernet
-  ]
 }
