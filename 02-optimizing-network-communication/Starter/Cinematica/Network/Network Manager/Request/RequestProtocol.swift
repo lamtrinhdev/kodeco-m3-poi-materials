@@ -84,7 +84,7 @@ extension RequestProtocol {
       components.queryItems = urlParams.map { URLQueryItem(name: $0, value: $1) }
     }
 
-    guard let url = components.url else { throw  NetworkError.invalidURL }
+    guard let url = components.url else { throw URLError(.badURL) }
 
     var urlRequest = URLRequest(url: url)
     urlRequest.httpMethod = requestType.rawValue

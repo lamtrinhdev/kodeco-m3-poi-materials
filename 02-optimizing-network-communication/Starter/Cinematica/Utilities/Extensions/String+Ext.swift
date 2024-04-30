@@ -32,33 +32,9 @@
 
 import Foundation
 
-enum MoviesRequests: RequestProtocol {
-  case fetchUpcoming(page: Int)
-  case movieDetailsWith(id: String)
-
-  var host: String {
-    APIConstants.host
-  }
-
-  var path: String {
-    switch self {
-    case .fetchUpcoming:
-      return APIsPaths.upcomingPath
-    case .movieDetailsWith(let id):
-      return APIsPaths.moviePath + "/\(id)"
-    }
-  }
-
-  var requestType: RequestType {
-    .GET
-  }
-
-  var urlParams: [String: String?] {
-    switch self {
-    case .fetchUpcoming(let page):
-      return ["page": "\(page)", "sort_by": "popularity.desc"]
-    case .movieDetailsWith:
-      return [:]
-    }
+extension String: Identifiable {
+  public typealias ID = Int
+  public var id: Int {
+    return hash
   }
 }

@@ -39,7 +39,7 @@ struct MovieCellView: View {
   // MARK: - body
   var body: some View {
     HStack(alignment: .top) {
-      RemoteImage(url: movie.imageUrl ?? "")
+      RemoteImage(url: movie.imagePath ?? "")
         .aspectRatio(0.67, contentMode: .fit)
         .frame(height: 100)
         .padding(.trailing, 5)
@@ -52,6 +52,12 @@ struct MovieCellView: View {
       Spacer()
     }
     .frame(height: 100)
+    .background(
+      Rectangle()
+        .fill(Color.white)
+        .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 2)
+        .padding(1)
+    )
   }
 }
 

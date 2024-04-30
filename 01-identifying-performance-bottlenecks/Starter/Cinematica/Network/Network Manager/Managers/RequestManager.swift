@@ -49,7 +49,6 @@ public class RequestManager: RequestManagerProtocol {
     let configuration = URLSessionConfiguration.ephemeral
     configuration.timeoutIntervalForRequest = 90
     configuration.timeoutIntervalForResource = 90
-    configuration.requestCachePolicy = .useProtocolCachePolicy
     return URLSession(configuration: configuration)
   }
 

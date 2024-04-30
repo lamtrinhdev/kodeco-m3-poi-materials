@@ -31,41 +31,28 @@
 /// THE SOFTWARE.
 
 import Foundation
+import Observation
 
-class MovieListViewModel: ObservableObject {
+@Observable
+class MovieListViewModel {
   // MARK: - Properties
-  @Published var movies: [Movie] = []
-  @Published var isLoading = true
-  @Published var errorMessage: String?
+  var movies: [Movie] = []
+  var isLoading = true
   private let requestManager = RequestManager()
-  private var currentPage = 1
-  private var totalPages = 1
-  private var isFetching = false
 
   // MARK: - Methods
-  func fetchMovies() {
-    guard !isFetching && currentPage <= totalPages else { return }
-    isFetching = true
-
-    Task {
-      do {
-        let moviePaginatedResponse: MoviePaginatedResponse = try await
-          requestManager.perform(MoviesRequests.fetchNowPlaying(page: currentPage))
-        let newMovies = moviePaginatedResponse.results ?? []
-        await MainActor.run {
-          self.movies.append(contentsOf: newMovies)
-          self.totalPages = moviePaginatedResponse.totalPages ?? 1
-          self.isLoading = false
-          self.currentPage += 1
-          self.isFetching = false
-          self.errorMessage = nil
-        }
-      } catch {
-        await MainActor.run {
-          self.isLoading = false
-          self.errorMessage = error.localizedDescription
-          self.isFetching = false
-        }
+  func fetchMovies() async {
+    do {
+      let moviePaginatedResponse: MoviePaginatedResponse = try await
+      requestManager.perform(MoviesRequests.fetchNowPlaying(page: 1))
+      let newMovies = moviePaginatedResponse.results ?? []
+      await MainActor.run {
+        self.movies.append(contentsOf: newMovies)
+        self.isLoading = false
+      }
+    } catch {
+      await MainActor.run {
+        self.isLoading = false
       }
     }
   }
