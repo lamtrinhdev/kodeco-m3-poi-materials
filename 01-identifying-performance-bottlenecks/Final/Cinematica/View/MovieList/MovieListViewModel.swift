@@ -44,7 +44,7 @@ class MovieListViewModel {
   func fetchMovies() async {
     do {
       let moviePaginatedResponse: MoviePaginatedResponse = try await
-      requestManager.perform(MoviesRequests.fetchNowPlaying(page: 1))
+      requestManager.perform(MoviesRequests.fetchUpcoming(page: 1))
       let newMovies = moviePaginatedResponse.results ?? []
       await MainActor.run {
         self.movies.append(contentsOf: newMovies)
