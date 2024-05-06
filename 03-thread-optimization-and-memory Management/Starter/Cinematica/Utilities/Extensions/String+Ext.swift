@@ -32,23 +32,9 @@
 
 import Foundation
 
-struct Movie: Codable, Identifiable, Equatable, Hashable {
-  let adult: Bool?
-  let backdropPath: String?
-  let genreIds: [Int]?
-  let id: Int?
-  let originalLanguage: String?
-  let originalTitle: String?
-  let overview: String?
-  let popularity: Double?
-  let posterPath: String?
-  let releaseDate: String?
-  let title: String?
-  let video: Bool?
-  let voteAverage: Double?
-  let voteCount: Int?
-
-  var imagePath: String? {
-    return AppConstants.imageBaseUrl + (posterPath ?? "")
+extension String: Identifiable {
+  public typealias ID = Int
+  public var id: Int {
+    return hash
   }
 }

@@ -32,23 +32,15 @@
 
 import Foundation
 
-struct Movie: Codable, Identifiable, Equatable, Hashable {
-  let adult: Bool?
-  let backdropPath: String?
-  let genreIds: [Int]?
-  let id: Int?
-  let originalLanguage: String?
-  let originalTitle: String?
-  let overview: String?
-  let popularity: Double?
-  let posterPath: String?
-  let releaseDate: String?
-  let title: String?
-  let video: Bool?
-  let voteAverage: Double?
-  let voteCount: Int?
+@Observable
+class ErrorManager {
+  var errorMessage: String?
 
-  var imagePath: String? {
-    return AppConstants.imageBaseUrl + (posterPath ?? "")
+  func handleError(_ error: Error?) {
+    errorMessage = error?.localizedDescription
+  }
+
+  func clearError() {
+    errorMessage = nil
   }
 }

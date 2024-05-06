@@ -36,14 +36,24 @@ public enum NetworkError: LocalizedError {
   case network
   case invalidURL
   case invalidServerResponse
+  case clientError
+  case serverError
+  case unknownError
+
   public var errorDescription: String? {
     switch self {
     case .network:
-      return "Please Check your internet connection."
+      return "Please check your internet connection."
     case .invalidURL:
       return "URL string is malformed."
     case .invalidServerResponse:
       return "The server returned an invalid response."
+    case .clientError:
+      return "An error occurred on the client side."
+    case .serverError:
+      return "An error occurred on the server side."
+    case .unknownError:
+      return "An unknown error occurred."
     }
   }
 }

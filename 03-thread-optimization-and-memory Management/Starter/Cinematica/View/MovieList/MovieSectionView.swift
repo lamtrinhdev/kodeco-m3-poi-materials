@@ -30,25 +30,28 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import Foundation
+import SwiftUI
 
-struct Movie: Codable, Identifiable, Equatable, Hashable {
-  let adult: Bool?
-  let backdropPath: String?
-  let genreIds: [Int]?
-  let id: Int?
-  let originalLanguage: String?
-  let originalTitle: String?
-  let overview: String?
-  let popularity: Double?
-  let posterPath: String?
-  let releaseDate: String?
-  let title: String?
-  let video: Bool?
-  let voteAverage: Double?
-  let voteCount: Int?
+struct MovieSectionView: View {
+  let movies: [Movie]
+  let title: String
 
-  var imagePath: String? {
-    return AppConstants.imageBaseUrl + (posterPath ?? "")
+  var body: some View {
+    VStack(alignment: .leading, spacing: 5) {
+      Text(title)
+        .font(.title)
+        .padding(.top, 15)
+        .padding(.leading, 15)
+
+      ScrollView(.horizontal, showsIndicators: false) {
+        LazyHStack(spacing: 10) {
+          ForEach(movies, id: \.id) { movie in
+            MovieCellView(movie: movie)
+              .frame(width: 150, height: 200)
+          }
+        }
+      }
+    }
+    .background(Color(.secondarySystemBackground))
   }
 }

@@ -30,25 +30,20 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import Foundation
+import UIKit
 
-struct Movie: Codable, Identifiable, Equatable, Hashable {
-  let adult: Bool?
-  let backdropPath: String?
-  let genreIds: [Int]?
-  let id: Int?
-  let originalLanguage: String?
-  let originalTitle: String?
-  let overview: String?
-  let popularity: Double?
-  let posterPath: String?
-  let releaseDate: String?
-  let title: String?
-  let video: Bool?
-  let voteAverage: Double?
-  let voteCount: Int?
+class ImageCache {
+  static let shared = ImageCache()
 
-  var imagePath: String? {
-    return AppConstants.imageBaseUrl + (posterPath ?? "")
+  private let cache = NSCache<NSString, UIImage>()
+
+  private init() {}
+
+  func set(_ image: UIImage, forKey key: String) {
+    cache.setObject(image, forKey: key as NSString)
+  }
+
+  func get(forKey key: String) -> UIImage? {
+    return cache.object(forKey: key as NSString)
   }
 }
