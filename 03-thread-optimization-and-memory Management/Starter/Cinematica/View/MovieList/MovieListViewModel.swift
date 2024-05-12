@@ -57,18 +57,14 @@ class MovieListViewModel {
       if let newMovies = moviePaginatedResponse.results {
         movies.append(contentsOf: newMovies)
       }
-      await MainActor.run {
-        self.totalPages = moviePaginatedResponse.totalPages ?? 1
-        self.isLoading = false
-        self.currentPage += 1
-        self.isFetching = false
-      }
+      self.totalPages = moviePaginatedResponse.totalPages ?? 1
+      self.isLoading = false
+      self.currentPage += 1
+      self.isFetching = false
     } catch {
-      await MainActor.run {
-        self.isLoading = false
-        errorManager.handleError(error)
-        self.isFetching = false
-      }
+      self.isLoading = false
+      errorManager.handleError(error)
+      self.isFetching = false
     }
   }
 

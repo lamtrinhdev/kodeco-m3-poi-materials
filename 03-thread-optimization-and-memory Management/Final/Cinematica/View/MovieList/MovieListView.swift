@@ -33,19 +33,23 @@
 import SwiftUI
 
 struct MovieListView: View {
-  @StateObject var movieListViewModel: MovieListViewModel
+  @State var movieListViewModel: MovieListViewModel
   @State private var showingErrorAlert = false
 
+  var columns: [GridItem] = [
+    GridItem(.flexible(), spacing: 0)
+  ]
+
   var body: some View {
-    NavigationView {
+    NavigationStack {
       ZStack {
         ScrollView {
           VStack(spacing: 20) {
-            ForEach(movieListViewModel.allMovies.keys.sorted(), id: \.self) { movieType in
-              SectionView(movieListViewModel: movieListViewModel, movieType: movieType)
-            }
+            MovieSectionView(movies: movieListViewModel.upcomingMovies, title: "Upcoming")
+            MovieSectionView(movies: movieListViewModel.topRatedMovies, title: "Top Rated")
+            MovieSectionView(movies: movieListViewModel.popularMovies, title: "Popular")
           }
-          .navigationTitle("Movies")
+          .padding()
         }
 
         if movieListViewModel.isLoading {
@@ -54,12 +58,14 @@ struct MovieListView: View {
             .background(Color(.systemBackground).opacity(0.8))
         }
 
-        if movieListViewModel.shouldShowError() {
+        if movieListViewModel.errorManager.errorMessage != nil {
           VStack {
             Spacer()
             Button("Retry") {
               Task {
-                await movieListViewModel.fetchInitialMovies()
+                await movieListViewModel.fetchUpcomingMovies()
+                await movieListViewModel.fetchTopRatedMovies()
+                await movieListViewModel.fetchPopularMovies()
               }
             }
             .padding()
@@ -71,58 +77,22 @@ struct MovieListView: View {
           .padding()
         }
       }
-      .alert(isPresented: $showingErrorAlert) {
+      .task {
+        await movieListViewModel.fetchUpcomingMovies()
+        await movieListViewModel.fetchTopRatedMovies()
+        await movieListViewModel.fetchPopularMovies()
+      }
+      .alert(item: $movieListViewModel.errorManager.errorMessage) { errorMessage in
         Alert(
           title: Text("Error"),
-          message: Text(movieListViewModel.errorMessage ?? "Unknown error occurred."),
-          dismissButton: .default(Text("OK"))
+          message: Text(errorMessage),
+          dismissButton: .default(Text("OK")) {
+            movieListViewModel.errorManager.clearError()
+          }
         )
       }
-      .onReceive(movieListViewModel.$errorMessage) { errorMessage in
-        if errorMessage != nil {
-          showingErrorAlert = true
-        }
-      }
-      .onAppear {
-        Task {
-          await movieListViewModel.fetchInitialMovies()
-        }
-      }
     }
-  }
-}
-
-struct SectionView: View {
-  @ObservedObject var movieListViewModel: MovieListViewModel
-  let movieType: MovieCategoryType
-  @State private var isPaginationLoading = false
-
-  var body: some View {
-    VStack(alignment: .leading, spacing: 5) {
-      Text(movieType.rawValue)
-        .font(.title)
-        .padding(.top, 15)
-        .padding(.leading, 15)
-
-      ScrollView(.horizontal, showsIndicators: false) {
-        LazyHStack(spacing: 10) {
-          ForEach(movieListViewModel.allMovies[movieType] ?? [], id: \.self) { movie in
-            MovieCellView(movie: movie)
-              .frame(width: 150, height: 200)
-              .onAppear {
-                if movie == movieListViewModel.allMovies[movieType]?.last && !isPaginationLoading {
-                  isPaginationLoading = true
-                  Task {
-                    await movieListViewModel.fetchMoreMovies(for: movieType)
-                    isPaginationLoading = false
-                  }
-                }
-              }
-          }
-        }
-      }
-    }
-    .background(Color(.secondarySystemBackground))
+    .navigationTitle("Movies")
   }
 }
 
