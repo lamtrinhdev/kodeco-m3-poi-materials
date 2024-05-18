@@ -44,43 +44,46 @@ struct MovieListView: View {
     NavigationStack {
       ZStack {
         ScrollView {
-          VStack(spacing: 20) {
-            MovieSectionView(movies: movieListViewModel.upcomingMovies, title: "Upcoming")
-            MovieSectionView(movies: movieListViewModel.topRatedMovies, title: "Top Rated")
-            MovieSectionView(movies: movieListViewModel.popularMovies, title: "Popular")
+          LazyVGrid(columns: columns, spacing: 10) {
+            ForEach(movieListViewModel.movies) { movie in
+              MovieCellView(movie: movie)
+                .frame(height: 100)
+                .onAppear {
+                  if movie.id == movieListViewModel.movies.last?.id {
+                    fetchMovies()
+                  }
+                }
+            }
+            .padding(.horizontal)
           }
-          .padding()
+          .navigationTitle("Upcoming Movies")
         }
-
         if movieListViewModel.isLoading {
-          ProgressView("Loading...")
+          ProgressView("Downloading upcoming movies...")
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.systemBackground).opacity(0.8))
         }
-
-        if movieListViewModel.errorManager.errorMessage != nil {
+        if movieListViewModel.errorManager.errorMessage != nil && movieListViewModel.movies.isEmpty {
           VStack {
             Spacer()
-            Button("Retry") {
-              Task {
-                await movieListViewModel.fetchUpcomingMovies()
-                await movieListViewModel.fetchTopRatedMovies()
-                await movieListViewModel.fetchPopularMovies()
-              }
+            Button {
+              fetchMovies()
+            } label: {
+              Text("Retry")
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(8)
             }
-            .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(8)
             Spacer()
           }
           .padding()
         }
       }
       .task {
-        await movieListViewModel.fetchUpcomingMovies()
-        await movieListViewModel.fetchTopRatedMovies()
-        await movieListViewModel.fetchPopularMovies()
+        if movieListViewModel.movies.isEmpty {
+          await movieListViewModel.fetchMovies()
+        }
       }
       .alert(item: $movieListViewModel.errorManager.errorMessage) { errorMessage in
         Alert(
@@ -92,7 +95,12 @@ struct MovieListView: View {
         )
       }
     }
-    .navigationTitle("Movies")
+  }
+
+  private func fetchMovies() {
+    Task {
+      await movieListViewModel.fetchMovies()
+    }
   }
 }
 

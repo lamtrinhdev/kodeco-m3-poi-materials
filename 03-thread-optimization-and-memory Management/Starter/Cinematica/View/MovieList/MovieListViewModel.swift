@@ -36,10 +36,7 @@ import Observation
 @Observable
 class MovieListViewModel {
   // MARK: - Properties
-  var upcomingMovies: [Movie] = []
-  var topRatedMovies: [Movie] = []
-  var popularMovies: [Movie] = []
-
+  var movies: [Movie] = []
   var isLoading = true
   var errorManager = ErrorManager()
   private let requestManager = RequestManager()
@@ -48,49 +45,27 @@ class MovieListViewModel {
   private var isFetching = false
 
   // MARK: - Methods
-  func fetchMovies(_ request: MoviesRequests, into movies: inout [Movie]) async {
+  func fetchMovies() async {
     guard !isFetching && currentPage <= totalPages else { return }
     isFetching = true
 
     do {
-      let moviePaginatedResponse: MoviePaginatedResponse = try await requestManager.perform(request)
-      if let newMovies = moviePaginatedResponse.results {
-        movies.append(contentsOf: newMovies)
+      let moviePaginatedResponse: MoviePaginatedResponse = try await
+      requestManager.perform(MoviesRequests.fetchUpcoming(page: currentPage))
+      let newMovies = moviePaginatedResponse.results ?? []
+      await MainActor.run {
+        self.movies.append(contentsOf: newMovies)
+        self.totalPages = moviePaginatedResponse.totalPages ?? 1
+        self.isLoading = false
+        self.currentPage += 1
+        self.isFetching = false
       }
-      self.totalPages = moviePaginatedResponse.totalPages ?? 1
-      self.isLoading = false
-      self.currentPage += 1
-      self.isFetching = false
     } catch {
-      self.isLoading = false
-      errorManager.handleError(error)
-      self.isFetching = false
+      await MainActor.run {
+        self.isLoading = false
+        errorManager.handleError(error)
+        self.isFetching = false
+      }
     }
-  }
-
-  // Fetch movies
-  func fetchUpcomingMovies() async {
-    await fetchMovies(fetchUpcomingRequest(), into: &upcomingMovies)
-  }
-
-  func fetchTopRatedMovies() async {
-    await fetchMovies(fetchTopRatedRequest(), into: &topRatedMovies)
-  }
-
-  func fetchPopularMovies() async {
-    await fetchMovies(fetchPopularRequest(), into: &popularMovies)
-  }
-
-  // Fetch Requests
-  private func fetchUpcomingRequest() -> MoviesRequests {
-    return .fetchUpcoming(page: 1)
-  }
-
-  private func fetchTopRatedRequest() -> MoviesRequests {
-    return .fetchTopRated(page: 1)
-  }
-
-  private func fetchPopularRequest() -> MoviesRequests {
-    return .fetchPopular(page: 1)
   }
 }

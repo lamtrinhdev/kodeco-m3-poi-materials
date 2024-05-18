@@ -34,8 +34,6 @@ import Foundation
 
 enum MoviesRequests: RequestProtocol {
   case fetchUpcoming(page: Int)
-  case fetchTopRated(page: Int)
-  case fetchPopular(page: Int)
   case movieDetailsWith(id: String)
 
   var host: String {
@@ -46,10 +44,6 @@ enum MoviesRequests: RequestProtocol {
     switch self {
     case .fetchUpcoming:
       return APIsPaths.upcomingPath
-    case .fetchTopRated:
-      return APIsPaths.topRatedPath
-    case .fetchPopular:
-      return APIsPaths.popularPath
     case .movieDetailsWith(let id):
       return APIsPaths.moviePath + "/\(id)"
     }
@@ -61,7 +55,7 @@ enum MoviesRequests: RequestProtocol {
 
   var urlParams: [String: String?] {
     switch self {
-    case .fetchUpcoming(let page), .fetchTopRated(let page), .fetchPopular(let page):
+    case .fetchUpcoming(let page):
       return ["page": "\(page)", "sort_by": "popularity.desc"]
     case .movieDetailsWith:
       return [:]
