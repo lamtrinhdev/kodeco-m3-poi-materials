@@ -95,11 +95,6 @@ struct MovieListView: View {
         )
       }
     }
-//    .onReceive(movieListViewModel.$errorMessage) { errorMessage in
-//      if errorMessage != nil {
-//        showingErrorAlert = true
-//      }
-//    }
   }
 
   private func fetchMovies() {

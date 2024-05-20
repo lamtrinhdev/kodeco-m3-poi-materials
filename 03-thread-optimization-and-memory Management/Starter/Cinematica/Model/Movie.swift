@@ -48,8 +48,7 @@ struct Movie: Codable, Identifiable, Equatable, Hashable {
   let voteAverage: Double?
   let voteCount: Int?
 
-  var imageUrl: URL? {
-    let imagePath = AppConstants.imageBaseUrl + (posterPath ?? "")
-    return URL(string: imagePath)
+  var imagePath: String? {
+    return AppConstants.imageBaseUrl + (posterPath ?? "")
   }
 }

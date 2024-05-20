@@ -1,15 +1,15 @@
 /// Copyright (c) 2024 Kodeco Inc.
-///
+/// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
 /// in the Software without restriction, including without limitation the rights
 /// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 /// copies of the Software, and to permit persons to whom the Software is
 /// furnished to do so, subject to the following conditions:
-///
+/// 
 /// The above copyright notice and this permission notice shall be included in
 /// all copies or substantial portions of the Software.
-///
+/// 
 /// Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
 /// distribute, sublicense, create a derivative work, and/or sell copies of the
 /// Software in any work that is designed, intended, or marketed for pedagogical or
@@ -17,7 +17,7 @@
 /// or information technology.  Permission for such use, copying, modification,
 /// merger, publication, distribution, sublicensing, creation of derivative works,
 /// or sale is expressly withheld.
-///
+/// 
 /// This project and source code may use libraries or frameworks that are
 /// released under various Open-Source licenses. Use of those libraries and
 /// frameworks are governed by their own individual licenses.
@@ -30,42 +30,60 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import Foundation
-import Network
+import SwiftUI
 
-public final class NetworkReachability {
-  public static let queue = DispatchQueue(label: "NetworkConnectivityMonitor")
-  public static let monitor = NWPathMonitor()
+struct RemoteImage: View {
+  @State var imageLoader: ImageLoader
 
-  public static private(set) var isConnected = false
-  public static private(set) var isExpensive = false
-  public static private(set) var currentConnectionType: NWInterface.InterfaceType?
+  init(url: String) {
+    imageLoader = ImageLoader(url: url)
+  }
 
-  public static func startMonitoring() {
-    NetworkReachability.monitor.pathUpdateHandler = { path in
-      NetworkReachability.isConnected = path.status == .satisfied
-      NetworkReachability.isExpensive = path.isExpensive
-      NetworkReachability.currentConnectionType =
-      NWInterface.InterfaceType.allCases.first { path.usesInterfaceType($0) }
+  var body: some View {
+    if let image = imageLoader.image {
+      Image(uiImage: image)
+        .resizable()
+    } else {
+      ZStack {
+        Image(.imagePlaceholder)
+          .resizable()
+          .aspectRatio(0.67, contentMode: .fit)
+          .frame(height: 100)
+        ProgressView()
+      }
     }
-    NetworkReachability.monitor.start(queue: NetworkReachability.queue)
-  }
-
-  public static func stopMonitoring() {
-    NetworkReachability.monitor.cancel()
   }
 }
 
-public extension Notification.Name {
-  static let connectivityStatus = Notification.Name(rawValue: "connectivityStatusChanged")
-}
+@Observable
+class ImageLoader {
+  var image: UIImage?
 
-extension NWInterface.InterfaceType: CaseIterable {
-  public static var allCases: [NWInterface.InterfaceType] = [
-    .other,
-    .wifi,
-    .cellular,
-    .loopback,
-    .wiredEthernet
-  ]
+  private var url: String
+  private var task: URLSessionDataTask?
+
+  init(url: String) {
+    self.url = url
+    loadImage()
+  }
+
+  private func loadImage() {
+    if let cachedImage = ImageCache.shared.get(forKey: url) {
+      self.image = cachedImage
+      return
+    }
+
+    guard let url = URL(string: url) else { return }
+
+    task = URLSession.shared.dataTask(with: url) { data, _, error in
+      guard let data = data, error == nil else { return }
+
+      DispatchQueue.main.async {
+        guard let image = UIImage(data: data) else { return }
+        self.image = image
+        ImageCache.shared.set(image, forKey: self.url)
+      }
+    }
+    task?.resume()
+  }
 }

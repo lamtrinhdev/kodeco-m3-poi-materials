@@ -38,7 +38,7 @@ struct AppMain: App {
 
   var body: some Scene {
     WindowGroup {
-      MovieListView()
+      MovieListView(movieListViewModel: MovieListViewModel())
     }
   }
 }

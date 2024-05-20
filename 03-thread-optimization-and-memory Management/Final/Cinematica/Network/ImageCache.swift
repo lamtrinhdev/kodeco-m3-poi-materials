@@ -30,38 +30,20 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import Foundation
-import Observation
+import UIKit
 
-@Observable
-class MovieListViewModel {
-  // MARK: - Properties
-  var movies: [Movie] = []
-  var isLoading = true
-  var errorManager = ErrorManager()
-  private let requestManager = RequestManager()
-  private var currentPage = 1
-  private var totalPages = 1
-  private var isFetching = false
+class ImageCache {
+  static let shared = ImageCache()
 
-  // MARK: - Methods
-  func fetchMovies() async {
-    guard !isFetching && currentPage <= totalPages else { return }
-    isFetching = true
+  private let cache = NSCache<NSString, UIImage>()
 
-    do {
-      let moviePaginatedResponse: MoviePaginatedResponse = try await
-      requestManager.perform(MoviesRequests.fetchUpcoming(page: currentPage))
-      let newMovies = moviePaginatedResponse.results ?? []
-      self.movies.append(contentsOf: newMovies)
-      self.totalPages = moviePaginatedResponse.totalPages ?? 1
-      self.isLoading = false
-      self.currentPage += 1
-      self.isFetching = false
-    } catch {
-      self.isLoading = false
-      errorManager.handleError(error)
-      self.isFetching = false
-    }
+  private init() {}
+
+  func set(_ image: UIImage, forKey key: String) {
+    cache.setObject(image, forKey: key as NSString)
+  }
+
+  func get(forKey key: String) -> UIImage? {
+    return cache.object(forKey: key as NSString)
   }
 }

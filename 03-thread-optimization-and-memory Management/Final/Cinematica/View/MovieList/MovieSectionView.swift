@@ -30,38 +30,28 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import Foundation
-import Observation
+import SwiftUI
 
-@Observable
-class MovieListViewModel {
-  // MARK: - Properties
-  var movies: [Movie] = []
-  var isLoading = true
-  var errorManager = ErrorManager()
-  private let requestManager = RequestManager()
-  private var currentPage = 1
-  private var totalPages = 1
-  private var isFetching = false
+struct MovieSectionView: View {
+  let movies: [Movie]
+  let title: String
 
-  // MARK: - Methods
-  func fetchMovies() async {
-    guard !isFetching && currentPage <= totalPages else { return }
-    isFetching = true
+  var body: some View {
+    VStack(alignment: .leading, spacing: 5) {
+      Text(title)
+        .font(.title)
+        .padding(.top, 15)
+        .padding(.leading, 15)
 
-    do {
-      let moviePaginatedResponse: MoviePaginatedResponse = try await
-      requestManager.perform(MoviesRequests.fetchUpcoming(page: currentPage))
-      let newMovies = moviePaginatedResponse.results ?? []
-      self.movies.append(contentsOf: newMovies)
-      self.totalPages = moviePaginatedResponse.totalPages ?? 1
-      self.isLoading = false
-      self.currentPage += 1
-      self.isFetching = false
-    } catch {
-      self.isLoading = false
-      errorManager.handleError(error)
-      self.isFetching = false
+      ScrollView(.horizontal, showsIndicators: false) {
+        LazyHStack(spacing: 10) {
+          ForEach(movies, id: \.id) { movie in
+            MovieCellView(movie: movie)
+              .frame(width: 150, height: 200)
+          }
+        }
+      }
     }
+    .background(Color(.secondarySystemBackground))
   }
 }

@@ -33,7 +33,7 @@
 import Foundation
 import Network
 
-public final class NetworkReachability {
+public enum NetworkReachability {
   public static let queue = DispatchQueue(label: "NetworkConnectivityMonitor")
   public static let monitor = NWPathMonitor()
 

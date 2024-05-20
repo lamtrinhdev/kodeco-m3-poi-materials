@@ -31,37 +31,16 @@
 /// THE SOFTWARE.
 
 import Foundation
-import Observation
 
 @Observable
-class MovieListViewModel {
-  // MARK: - Properties
-  var movies: [Movie] = []
-  var isLoading = true
-  var errorManager = ErrorManager()
-  private let requestManager = RequestManager()
-  private var currentPage = 1
-  private var totalPages = 1
-  private var isFetching = false
+class ErrorManager {
+  var errorMessage: String?
 
-  // MARK: - Methods
-  func fetchMovies() async {
-    guard !isFetching && currentPage <= totalPages else { return }
-    isFetching = true
+  func handleError(_ error: Error?) {
+    errorMessage = error?.localizedDescription
+  }
 
-    do {
-      let moviePaginatedResponse: MoviePaginatedResponse = try await
-      requestManager.perform(MoviesRequests.fetchUpcoming(page: currentPage))
-      let newMovies = moviePaginatedResponse.results ?? []
-      self.movies.append(contentsOf: newMovies)
-      self.totalPages = moviePaginatedResponse.totalPages ?? 1
-      self.isLoading = false
-      self.currentPage += 1
-      self.isFetching = false
-    } catch {
-      self.isLoading = false
-      errorManager.handleError(error)
-      self.isFetching = false
-    }
+  func clearError() {
+    errorMessage = nil
   }
 }

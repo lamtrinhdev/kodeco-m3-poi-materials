@@ -38,28 +38,26 @@ struct MovieCellView: View {
 
   // MARK: - body
   var body: some View {
-    VStack {
-      AsyncImage(url: movie.imageUrl) { image in
-        image
-          .resizable()
-          .aspectRatio(0.67, contentMode: .fit)
-          .frame(height: 100)
-      } placeholder: {
-        ZStack {
-          Image(.imagePlaceholder)
-            .resizable()
-            .aspectRatio(0.67, contentMode: .fit)
-            .frame(height: 100)
-          ProgressView()
-        }
-      }
+    HStack(alignment: .top) {
+      RemoteImage(url: movie.imagePath ?? "")
+        .aspectRatio(0.67, contentMode: .fit)
+        .frame(height: 100)
+        .padding(.trailing, 5)
       VStack(alignment: .leading) {
         Text(movie.originalTitle ?? "")
-          .font(.caption)
+          .font(.title)
+        Text(movie.overview ?? "")
+          .font(.subheadline)
       }
       Spacer()
     }
     .frame(height: 100)
+    .background(
+      Rectangle()
+        .fill(Color.white)
+        .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 2)
+        .padding(1)
+    )
   }
 }
 

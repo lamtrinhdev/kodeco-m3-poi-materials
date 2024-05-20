@@ -33,105 +33,73 @@
 import SwiftUI
 
 struct MovieListView: View {
-  @ObservedObject var movieListViewModel: MovieListViewModel
+  @State var movieListViewModel: MovieListViewModel
+  @State private var showingErrorAlert = false
+
+  var columns: [GridItem] = [
+    GridItem(.flexible(), spacing: 0)
+  ]
 
   var body: some View {
-    NavigationView {
+    NavigationStack {
       ZStack {
         ScrollView {
-          VStack(spacing: 20) {
-            SectionView(movies: movieListViewModel.nowPlayingMovies, title: "Now Playing")
-            SectionView(movies: movieListViewModel.upcomingMovies, title: "Upcoming")
-            SectionView(movies: movieListViewModel.topRatedMovies, title: "Top Rated")
+          LazyVGrid(columns: columns, spacing: 10) {
+            ForEach(movieListViewModel.movies) { movie in
+              MovieCellView(movie: movie)
+                .frame(height: 100)
+                .onAppear {
+                  if movie.id == movieListViewModel.movies.last?.id {
+                    fetchMovies()
+                  }
+                }
+            }
+            .padding(.horizontal)
           }
-          .padding()
+          .navigationTitle("Upcoming Movies")
         }
-
         if movieListViewModel.isLoading {
-          ProgressView("Loading...")
+          ProgressView("Downloading upcoming movies...")
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.systemBackground).opacity(0.8))
         }
-
-        if movieListViewModel.errorMessage != nil {
+        if movieListViewModel.errorManager.errorMessage != nil && movieListViewModel.movies.isEmpty {
           VStack {
             Spacer()
-            Button("Retry") {
-              Task {
-                await movieListViewModel.fetchNowPlayingMovies()
-                await movieListViewModel.fetchUpcomingMovies()
-                await movieListViewModel.fetchTopRatedMovies()
-              }
+            Button {
+              fetchMovies()
+            } label: {
+              Text("Retry")
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(8)
             }
-            .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(8)
             Spacer()
           }
           .padding()
         }
       }
-      .alert(isPresented: Binding(
-        get: { movieListViewModel.errorMessage != nil },
-        set: { _ in movieListViewModel.errorMessage = nil }
-      )) {
+      .task {
+        if movieListViewModel.movies.isEmpty {
+          await movieListViewModel.fetchMovies()
+        }
+      }
+      .alert(item: $movieListViewModel.errorManager.errorMessage) { errorMessage in
         Alert(
           title: Text("Error"),
-          message: Text(movieListViewModel.errorMessage ?? "Unknown error occurred."),
-          dismissButton: .default(Text("OK"))
+          message: Text(errorMessage),
+          dismissButton: .default(Text("OK")) {
+            movieListViewModel.errorManager.clearError()
+          }
         )
       }
-      .onAppear {
-        Task {
-          await movieListViewModel.fetchNowPlayingMovies()
-          await movieListViewModel.fetchUpcomingMovies()
-          await movieListViewModel.fetchTopRatedMovies()
-        }
-      }
-      .navigationTitle("Movies")
     }
   }
-}
 
-struct SectionView: View {
-  let movies: [Movie]
-  let title: String
-
-  var body: some View {
-    VStack(alignment: .leading, spacing: 5) {
-      Text(title)
-        .font(.title)
-        .padding(.top, 15)
-        .padding(.leading, 15)
-
-      ScrollView(.horizontal, showsIndicators: false) {
-        LazyHStack(spacing: 10) {
-          ForEach(movies, id: \.id) { movie in
-            MovieCellView(movie: movie)
-              .frame(width: 150, height: 200)
-          }
-        }
-      }
-    }
-    .background(Color(.secondarySystemBackground))
-  }
-}
-
-struct ErrorRetryView: View {
-  let retryAction: () -> Void
-
-  var body: some View {
-    VStack {
-      Spacer()
-      Button("Retry") {
-        retryAction()
-      }
-      .padding()
-      .background(Color.blue)
-      .foregroundColor(.white)
-      .cornerRadius(8)
-      Spacer()
+  private func fetchMovies() {
+    Task {
+      await movieListViewModel.fetchMovies()
     }
   }
 }

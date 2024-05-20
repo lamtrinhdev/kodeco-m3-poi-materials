@@ -1,15 +1,15 @@
 /// Copyright (c) 2024 Kodeco Inc.
-///
+/// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
 /// in the Software without restriction, including without limitation the rights
 /// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 /// copies of the Software, and to permit persons to whom the Software is
 /// furnished to do so, subject to the following conditions:
-///
+/// 
 /// The above copyright notice and this permission notice shall be included in
 /// all copies or substantial portions of the Software.
-///
+/// 
 /// Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
 /// distribute, sublicense, create a derivative work, and/or sell copies of the
 /// Software in any work that is designed, intended, or marketed for pedagogical or
@@ -17,7 +17,7 @@
 /// or information technology.  Permission for such use, copying, modification,
 /// merger, publication, distribution, sublicensing, creation of derivative works,
 /// or sale is expressly withheld.
-///
+/// 
 /// This project and source code may use libraries or frameworks that are
 /// released under various Open-Source licenses. Use of those libraries and
 /// frameworks are governed by their own individual licenses.
@@ -31,94 +31,66 @@
 /// THE SOFTWARE.
 
 import Foundation
+import Observation
 
-class MovieListViewModel: ObservableObject {
+@Observable
+class MovieListViewModel {
   // MARK: - Properties
-  @Published var allMovies: [MovieCategoryType: [Movie]] = [:]
+  var upcomingMovies: [Movie] = []
+  var topRatedMovies: [Movie] = []
+  var popularMovies: [Movie] = []
 
-  @Published var isLoading = true
-  @Published var errorMessage: String?
-
+  var isLoading = true
+  var errorManager = ErrorManager()
   private let requestManager = RequestManager()
-  private var currentPage = [MovieCategoryType: Int]()
-  private var totalPages = [MovieCategoryType: Int]()
-  private var isFetching = [MovieCategoryType: Bool]()
-
-  func shouldShowError() -> Bool {
-    return errorMessage != nil && allMovies.values.allSatisfy { $0.isEmpty }
-  }
+  private var currentPage = 1
+  private var totalPages = 1
+  private var isFetching = false
 
   // MARK: - Methods
-  @MainActor
-  func fetchInitialMovies() async {
-    isLoading = true
-    errorMessage = nil
+  func fetchMovies(_ request: MoviesRequests, into movies: inout [Movie]) async {
+    guard !isFetching && currentPage <= totalPages else { return }
+    isFetching = true
 
     do {
-      try await withThrowingTaskGroup(of: Void.self) { group in
-        group.addTask {
-          try await self.fetchMoviesOfType(.nowPlaying)
-        }
-        group.addTask {
-          try await self.fetchMoviesOfType(.upcoming)
-        }
-        group.addTask {
-          try await self.fetchMoviesOfType(.topRated)
-        }
-        for try await _ in group {}
+      let moviePaginatedResponse: MoviePaginatedResponse = try await requestManager.perform(request)
+      if let newMovies = moviePaginatedResponse.results {
+        movies.append(contentsOf: newMovies)
       }
+      self.totalPages = moviePaginatedResponse.totalPages ?? 1
+      self.isLoading = false
+      self.currentPage += 1
+      self.isFetching = false
     } catch {
-      errorMessage = error.localizedDescription
-    }
-
-    isLoading = false
-  }
-
-  func fetchMoreMovies(for type: MovieCategoryType) async {
-    guard let isFetching = isFetching[type],
-      let currentPage = currentPage[type],
-      let totalPages = totalPages[type],
-      !isFetching && currentPage <= totalPages else {
-      return
-    }
-    self.isFetching[type] = true
-
-    do {
-      try await fetchMoviesOfType(type)
-    } catch {
-      errorMessage = error.localizedDescription
+      self.isLoading = false
+      errorManager.handleError(error)
+      self.isFetching = false
     }
   }
 
-  private func fetchMoviesOfType(_ type: MovieCategoryType) async throws {
-    let currentPageForType = currentPage[type] ?? 1
-    guard currentPageForType <= totalPages[type] ?? 1 else { return }
+  // Fetch movies
+  func fetchUpcomingMovies() async {
+    await fetchMovies(fetchUpcomingRequest(), into: &upcomingMovies)
+  }
 
-    let movieRequest: MoviesRequests
-    switch type {
-    case .nowPlaying:
-      movieRequest = .fetchNowPlaying(page: currentPageForType)
-    case .upcoming:
-      movieRequest = .fetchUpcoming(page: currentPageForType)
-    case .topRated:
-      movieRequest = .fetchTopRated(page: currentPageForType)
-    }
+  func fetchTopRatedMovies() async {
+    await fetchMovies(fetchTopRatedRequest(), into: &topRatedMovies)
+  }
 
-    let moviePaginatedResponse: MoviePaginatedResponse = try await requestManager.perform(movieRequest)
-    let newMovies = moviePaginatedResponse.results ?? []
+  func fetchPopularMovies() async {
+    await fetchMovies(fetchPopularRequest(), into: &popularMovies)
+  }
 
-    await MainActor.run { [weak self] in
-      guard let self else { return }
-      if var existingMovies = allMovies[type] {
-        existingMovies.append(contentsOf: newMovies)
-        allMovies[type] = existingMovies
-      } else {
-        allMovies[type] = newMovies
-      }
+  // Fetch Requests
+  private func fetchUpcomingRequest() -> MoviesRequests {
+    return .fetchUpcoming(page: 1)
+  }
 
-      totalPages[type] = moviePaginatedResponse.totalPages ?? 1
-      currentPage[type] = currentPageForType + 1
-      isFetching[type] = false
-    }
+  private func fetchTopRatedRequest() -> MoviesRequests {
+    return .fetchTopRated(page: 1)
+  }
+
+  private func fetchPopularRequest() -> MoviesRequests {
+    return .fetchPopular(page: 1)
   }
 }
