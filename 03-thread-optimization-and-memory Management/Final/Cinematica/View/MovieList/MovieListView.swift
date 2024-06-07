@@ -63,9 +63,7 @@ struct MovieListView: View {
             Spacer()
             Button("Retry") {
               Task {
-                await movieListViewModel.fetchUpcomingMovies()
-                await movieListViewModel.fetchTopRatedMovies()
-                await movieListViewModel.fetchPopularMovies()
+                await movieListViewModel.fetchAllMovies()
               }
             }
             .padding()
@@ -78,9 +76,7 @@ struct MovieListView: View {
         }
       }
       .task {
-        await movieListViewModel.fetchUpcomingMovies()
-        await movieListViewModel.fetchTopRatedMovies()
-        await movieListViewModel.fetchPopularMovies()
+        await movieListViewModel.fetchAllMovies()
       }
       .alert(item: $movieListViewModel.errorManager.errorMessage) { errorMessage in
         Alert(
